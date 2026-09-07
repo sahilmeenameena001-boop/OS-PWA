@@ -1,0 +1,24 @@
+{
+  "name": "My Life OS",
+  "short_name": "Life OS",
+  "description": "A calm personal command centre: today, capture, money, memory.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0f1f",
+  "theme_color": "#0a0f1f",
+  "categories": ["productivity", "finance", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Quick capture", "url": "/capture", "description": "Save a thought immediately" },
+    { "name": "Add expense", "url": "/money?add=1", "description": "Amount, category, save" },
+    { "name": "Today", "url": "/", "description": "What must I do now?" }
+  ]
+}

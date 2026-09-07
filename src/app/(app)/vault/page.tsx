@@ -58,7 +58,7 @@ export default function VaultPage() {
         </div>
       </Panel>
       <Panel title={`Documents (${list.length})`} action={<Input aria-label="Search vault" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} className="h-9 w-40" />}>
-        {!rows ? <SkeletonRows /> : list.length === 0 ? <EmptyState icon={<IconFile size={28} />} title="Vault is empty" body="Receipts, IDs, prescriptions, contracts." /> : (
+        {!rows ? <SkeletonRows /> : list.length === 0 ? <EmptyState icon={<IconFile size={28} />} title="Vault is empty" body="Receipts, IDs, prescriptions, contracts. Use the Choose file button above; files up to 20 MB." /> : (
           <ul className="grid gap-2 sm:grid-cols-2">
             {list.map((r) => (
               <li key={r.id} className="flex items-center gap-3 rounded-xl border border-border p-3">

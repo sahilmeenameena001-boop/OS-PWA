@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useSession } from "@/lib/session/session-provider";
 import { getDB } from "@/lib/data/db";
@@ -35,7 +36,7 @@ export function HabitChecklist({ habits, logs, dateKey, essentialOnly }: { habit
   const dow = new Date(dateKey + "T00:00:00").getDay();
   const list = habits.filter((h) => h.is_active && h.schedule_days.includes(dow) && (!essentialOnly || h.is_essential));
   const logFor = (id: string) => logs.find((l) => l.habit_id === id && l.log_date === dateKey);
-  if (list.length === 0) return <p className="text-sm text-muted-foreground">No habits scheduled for this day.</p>;
+  if (list.length === 0) return <p className="text-sm text-muted-foreground">{habits.filter((h) => h.is_active).length === 0 ? <>No habits yet. <Link href="/habits" className="text-primary underline-offset-2 hover:underline">Add a medicine, walk or water reminder</Link>.</> : essentialOnly ? <>No essential habits today. <Link href="/habits" className="text-primary underline-offset-2 hover:underline">Mark one as essential</Link> to see it here.</> : "No habits scheduled for this day."}</p>;
   return (
     <ul className="space-y-1">
       {list.map((h) => {

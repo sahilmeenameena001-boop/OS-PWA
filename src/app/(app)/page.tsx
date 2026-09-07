@@ -18,12 +18,14 @@ import { EventDialog } from "@/components/calendar/event-dialog";
 import { Button } from "@/components/ui/button";
 import { IconArrowRight, IconInbox, IconMoon, IconPlus, IconSun } from "@/components/icons";
 import { useUI } from "@/store/ui";
+import { GettingStarted } from "@/components/today/getting-started";
 import type { CalendarEvent, Task } from "@/lib/types";
 
 export default function TodayPage() {
   const { profile, ready } = useSession();
   const currency = useCurrency();
   const openCapture = useUI((s) => s.openCapture);
+  const openExpense = useUI((s) => s.openExpense);
   const today = todayKey();
   const now = new Date();
   const tasks = useRows("tasks");
@@ -74,8 +76,12 @@ export default function TodayPage() {
         }
       />
 
+      {!loading ? <GettingStarted onAddTask={() => setNewTask(true)} /> : null}
+
       <Panel title="Your day" action={<Button size="sm" variant="ghost" onClick={() => setNewTask(true)}><IconPlus size={16} /> Add</Button>}>
-        {loading ? <div className="skeleton h-24 rounded-xl" /> : <DayTimeline items={items} isToday onSelect={onSelect} />}
+        {loading ? <div className="skeleton h-24 rounded-xl" /> : items.length === 0 ? (
+          <EmptyState title="Nothing planned for today" body="Add a task with a time and it appears on this timeline." action={<div className="flex gap-2"><Button size="sm" onClick={() => setNewTask(true)}><IconPlus size={16} /> Add task</Button><Button size="sm" variant="outline" nativeButton={false} render={<Link href="/calendar" />}>Open calendar</Button></div>} />
+        ) : <DayTimeline items={items} isToday onSelect={onSelect} />}
       </Panel>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -86,7 +92,7 @@ export default function TodayPage() {
               <p className="text-sm text-muted-foreground">{nowTask.start ? `${formatTime(nowTask.start.toISOString())}${nowTask.end ? ` – ${formatTime(nowTask.end.toISOString())}` : ""}` : "Anytime today"}{nowTask.category ? ` · ${nowTask.category}` : ""}</p>
             </button>
           ) : (
-            <p className="text-sm text-muted-foreground">Nothing scheduled right now. A good moment to clear the Inbox or rest.</p>
+            <div><p className="text-sm text-muted-foreground">Nothing scheduled right now.</p><div className="mt-2 flex flex-wrap gap-2"><Button size="sm" onClick={() => setNewTask(true)}>Add a task</Button><Button size="sm" variant="outline" onClick={() => openCapture()}>Capture a thought</Button></div></div>
           )}
           {nextEvent ? (
             <div className="mt-3 border-t border-border pt-3">
@@ -95,7 +101,10 @@ export default function TodayPage() {
             </div>
           ) : null}
         </Panel>
-        <SafeToSpendCard />
+        <div className="space-y-2">
+          <SafeToSpendCard />
+          {!loading && !(bills ?? []).length && (profile?.monthly_income ?? 0) === 0 ? <p className="px-1 text-xs text-muted-foreground">Safe-to-spend is based on your income, bills and savings. <Link href="/settings" className="text-primary underline-offset-2 hover:underline">Set them in Settings</Link> or <button className="text-primary underline-offset-2 hover:underline" onClick={openExpense}>log an expense</button> to begin.</p> : null}
+        </div>
       </div>
 
       {overdue.length > 0 ? (
@@ -139,7 +148,7 @@ export default function TodayPage() {
 
         <Panel title="Bills due soon" action={<Link href="/money?tab=bills" className="text-sm text-primary">Money</Link>}>
           {loading ? <SkeletonRows rows={2} /> : dueBills.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nothing due in the next 7 days.</p>
+            <EmptyState title="Nothing due in the next 7 days" body="Add rent, utilities or EMIs and they are reserved before you spend." action={<Button size="sm" variant="outline" nativeButton={false} render={<Link href="/money?tab=bills" />}>Add a bill</Button>} />
           ) : (
             <ul className="space-y-1">
               {dueBills.map((b) => (

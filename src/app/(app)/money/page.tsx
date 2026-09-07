@@ -113,7 +113,7 @@ function MoneyInner() {
           )}
           <div className="grid gap-4 md:grid-cols-2">
             <Panel title="Category breakdown">
-              {byCategory.length === 0 ? <EmptyState title="No spending yet this period" /> : (
+              {byCategory.length === 0 ? <EmptyState title="No spending yet this period" body="Log expenses as they happen and this fills in by category." action={<Button size="sm" onClick={openExpense}><IconPlus size={16} /> Add expense</Button>} /> : (
                 <ul className="space-y-2">
                   {byCategory.map((c) => (
                     <li key={c.id}>
@@ -157,7 +157,7 @@ function MoneyInner() {
       {tab === "bills" ? (
         <div className="grid gap-4 md:grid-cols-2">
           <Panel title="Recurring bills" action={<Button size="sm" variant="ghost" onClick={() => setDlg({ kind: "bill", item: null })}><IconPlus size={16} /> Bill</Button>}>
-            {bills.length === 0 ? <EmptyState title="No bills yet" body="Rent, utilities, EMIs… anything with a due date." /> : (
+            {bills.length === 0 ? <EmptyState title="No bills yet" body="Rent, utilities, EMIs… anything with a due date. Fixed bills are reserved from safe-to-spend until paid." action={<Button size="sm" onClick={() => setDlg({ kind: "bill", item: null })}><IconPlus size={16} /> Add a bill</Button>} /> : (
               <ul className="space-y-1">
                 {bills.filter((b) => b.status !== "ended").sort((a, b) => a.next_due_on.localeCompare(b.next_due_on)).map((b) => (
                   <li key={b.id} className="flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-muted/50">
@@ -172,7 +172,7 @@ function MoneyInner() {
             )}
           </Panel>
           <Panel title="Subscriptions" action={<Button size="sm" variant="ghost" onClick={() => setDlg({ kind: "sub", item: null })}><IconPlus size={16} /> Sub</Button>}>
-            {subs.length === 0 ? <EmptyState title="No subscriptions" /> : (
+            {subs.length === 0 ? <EmptyState title="No subscriptions" body="Netflix, Spotify, cloud storage… track renewals so they never surprise you." action={<Button size="sm" onClick={() => setDlg({ kind: "sub", item: null })}><IconPlus size={16} /> Add a subscription</Button>} /> : (
               <ul className="space-y-1">
                 {subs.sort((a, b) => a.next_billing_on.localeCompare(b.next_billing_on)).map((s) => (
                   <li key={s.id} className={cn("flex items-center gap-2 rounded-xl px-2 py-2 hover:bg-muted/50", s.status !== "active" && "opacity-60")}>
@@ -187,7 +187,7 @@ function MoneyInner() {
             <p className="mt-3 text-xs text-muted-foreground">Monthly total: {formatMoney(subs.filter((s) => s.status === "active").reduce((sum, s) => sum + (s.billing_cycle === "yearly" ? s.amount / 12 : s.billing_cycle === "weekly" ? s.amount * 4.33 : s.amount), 0), currency)}</p>
           </Panel>
           <Panel title="Debts and repayments" action={<Button size="sm" variant="ghost" onClick={() => setDlg({ kind: "debt", item: null })}><IconPlus size={16} /> Debt</Button>} className="md:col-span-2">
-            {debts.length === 0 ? <EmptyState title="No debts recorded" body="Good place to be." /> : (
+            {debts.length === 0 ? <EmptyState title="No debts recorded" body="Add an EMI or loan and its monthly payment is set aside automatically." action={<Button size="sm" variant="outline" onClick={() => setDlg({ kind: "debt", item: null })}><IconPlus size={16} /> Add a debt</Button>} /> : (
               <ul className="grid gap-2 md:grid-cols-2">
                 {debts.map((d) => {
                   const paid = d.principal > 0 ? 1 - d.remaining / d.principal : 0;

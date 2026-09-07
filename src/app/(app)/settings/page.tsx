@@ -101,6 +101,14 @@ export default function SettingsPage() {
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Exports include all tables in {currency}. Imports add records that are not already present.</p>
       </Panel>
+      <Panel title="How this app works">
+        <ol className="grid gap-2 text-sm sm:grid-cols-2">
+          <li className="rounded-xl bg-muted/50 p-3"><p className="font-medium">1. Capture first, sort later</p><p className="text-xs text-muted-foreground">The + button saves anything instantly to the Inbox. Turn it into a task, expense, note or reminder when you have a moment.</p></li>
+          <li className="rounded-xl bg-muted/50 p-3"><p className="font-medium">2. Today shows what matters now</p><p className="text-xs text-muted-foreground">Your timeline, top 3 priorities, essential habits, bills due and how much is safe to spend.</p></li>
+          <li className="rounded-xl bg-muted/50 p-3"><p className="font-medium">3. Money is simple arithmetic</p><p className="text-xs text-muted-foreground">Income + balance, minus protected savings, unpaid bills and debts, minus what you have spent, divided by days left in the month.</p></li>
+          <li className="rounded-xl bg-muted/50 p-3"><p className="font-medium">4. Nothing is ever lost</p><p className="text-xs text-muted-foreground">Works offline, syncs when back online. Financial records are never edited silently; corrections keep the original.</p></li>
+        </ol>
+      </Panel>
       <Panel title="Delete account data" className="border-coral/40">
         <p className="text-sm text-muted-foreground">Removes every record{mode === "cloud" ? " from Supabase and this device" : " from this browser"}. Export first if you might want it back.</p>
         <Button variant="destructive" className="mt-3" onClick={() => setDelOpen(true)}><IconTrash size={16} /> Delete all my data</Button>

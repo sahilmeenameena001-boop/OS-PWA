@@ -7,12 +7,15 @@ import { formatMoney } from "@/lib/format";
 import { todayKey, toDateKey } from "@/lib/dates";
 import { unusualExpenses } from "@/lib/money/safe-to-spend";
 import { PageHeader, Panel, Stat, EmptyState } from "@/components/common";
+import { Button } from "@/components/ui/button";
+import { useUI } from "@/store/ui";
 import { subDays } from "date-fns";
 
 const COLORS = ["var(--primary)", "var(--mint)", "var(--amber)", "var(--violet)", "var(--coral)", "var(--muted-foreground)"];
 
 export default function InsightsPage() {
   const currency = useCurrency();
+  const openExpense = useUI((s) => s.openExpense);
   const snap = useMoneySnapshot();
   const txs = useRowsOr("transactions");
   const tasks = useRowsOr("tasks");
@@ -72,7 +75,7 @@ export default function InsightsPage() {
           <table className="sr-only"><caption>Monthly totals</caption><tbody>{monthly.map((m) => <tr key={m.key}><td>{m.label}</td><td>{formatMoney(m.income, currency)}</td><td>{formatMoney(m.spent, currency)}</td></tr>)}</tbody></table>
         </Panel>
         <Panel title="Where it went this period">
-          {arcs.length === 0 ? <EmptyState title="No expenses yet" /> : (
+          {arcs.length === 0 ? <EmptyState title="No expenses yet" body="Charts appear once you log a few expenses." action={<Button size="sm" onClick={openExpense}>Add expense</Button>} /> : (
             <div className="flex items-center gap-4">
               <svg viewBox="0 0 100 100" className="size-36 shrink-0" role="img" aria-label={arcs.map((a) => `${a.name} ${Math.round(a.pct * 100)}%`).join(", ")}>
                 {arcs.map((a) => <path key={a.id} d={arcPath(a.start, Math.max(a.end - 0.004, a.start))} stroke={a.color} strokeWidth="14" fill="none" strokeLinecap="butt" />)}

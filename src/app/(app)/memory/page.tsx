@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { format, subDays } from "date-fns";
 import { useSession } from "@/lib/session/session-provider";
+import { useUI } from "@/store/ui";
 import { useRows, useRowsOr, useCurrency, useCategoryMap } from "@/lib/data/hooks";
 import { insert, update, remove } from "@/lib/data/repo";
 import { buildMemoryItems, matchesQuery, buildDailySummary, summaryToText, buildWeeklyReview, type MemoryItem } from "@/lib/memory/summary";
@@ -25,6 +26,7 @@ const TYPES: { value: MemoryItem["type"] | "all"; label: string }[] = [
 function MemoryInner() {
   const params = useSearchParams();
   const { userId } = useSession();
+  const openCapture = useUI((s) => s.openCapture);
   const currency = useCurrency();
   const notes = useRows("notes");
   const inbox = useRowsOr("inbox_items");
@@ -99,7 +101,7 @@ function MemoryInner() {
         </Panel>
       ) : null}
 
-      {!notes ? <SkeletonRows rows={5} /> : grouped.length === 0 ? <EmptyState title="Nothing matches" body={q ? "Try fewer or different words." : "Your timeline fills up as you use the app."} /> : (
+      {!notes ? <SkeletonRows rows={5} /> : grouped.length === 0 ? <EmptyState title={q || onDate ? "Nothing matches" : "Your memory is empty so far"} body={q || onDate ? "Try fewer or different words, or clear the date." : "Notes, captures, completed tasks and expenses all show up here in order."} action={q || onDate ? undefined : <div className="flex gap-2"><Button size="sm" onClick={() => setNoteDlg({ note: null })}><IconPlus size={16} /> Write a note</Button><Button size="sm" variant="outline" onClick={() => openCapture()}>Capture a thought</Button></div>} /> : (
         <div className="space-y-4">
           {grouped.map(([day, list]) => (
             <section key={day} aria-label={formatDateHuman(day)}>

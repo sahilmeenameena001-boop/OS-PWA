@@ -52,7 +52,7 @@ export function CommandPalette() {
   };
   return (
     <CommandDialog open={open} onOpenChange={setOpen} title="Search and commands" description="Jump anywhere or find any memory">
-      <CommandInput placeholder="Search notes, tasks, expenses, or type a page…" />
+      <CommandInput autoFocus placeholder="Search notes, tasks, expenses, or type a page…" />
       <CommandList className="max-h-[60vh]">
         <CommandEmpty>Nothing found. Try fewer words.</CommandEmpty>
         <CommandGroup heading="Actions">

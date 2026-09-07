@@ -4,7 +4,12 @@ create extension if not exists "pgcrypto";
 create or replace function public.set_updated_at() returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end $$;
 
-create table public.profiles (
+-- array_to_string is only STABLE, which generated columns reject; this wrapper is safe for text[].
+create or replace function public.tags_text(text[]) returns text language sql immutable parallel safe as $$
+  select coalesce(array_to_string($1, ' '), '')
+$$;
+
+create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   display_name text,
@@ -22,7 +27,7 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
-create table public.accounts (
+create table if not exists public.accounts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -35,7 +40,7 @@ create table public.accounts (
   updated_at timestamptz not null default now()
 );
 
-create table public.expense_categories (
+create table if not exists public.expense_categories (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -48,7 +53,7 @@ create table public.expense_categories (
   updated_at timestamptz not null default now()
 );
 
-create table public.budgets (
+create table if not exists public.budgets (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   category_id uuid not null references public.expense_categories(id) on delete cascade,
@@ -59,7 +64,7 @@ create table public.budgets (
   unique (user_id, category_id, month)
 );
 
-create table public.savings_goals (
+create table if not exists public.savings_goals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -74,7 +79,7 @@ create table public.savings_goals (
   updated_at timestamptz not null default now()
 );
 
-create table public.transactions (
+create table if not exists public.transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   type text not null check (type in ('expense','income','transfer','contribution','repayment')),
@@ -98,7 +103,7 @@ create table public.transactions (
   updated_at timestamptz not null default now()
 );
 
-create table public.savings_contributions (
+create table if not exists public.savings_contributions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   goal_id uuid not null references public.savings_goals(id) on delete cascade,
@@ -110,7 +115,7 @@ create table public.savings_contributions (
   updated_at timestamptz not null default now()
 );
 
-create table public.bills (
+create table if not exists public.bills (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -126,7 +131,7 @@ create table public.bills (
   updated_at timestamptz not null default now()
 );
 
-create table public.subscriptions (
+create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -141,7 +146,7 @@ create table public.subscriptions (
   updated_at timestamptz not null default now()
 );
 
-create table public.debts (
+create table if not exists public.debts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -155,7 +160,7 @@ create table public.debts (
   updated_at timestamptz not null default now()
 );
 
-create table public.attachments (
+create table if not exists public.attachments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   bucket text not null default 'private',
@@ -173,7 +178,7 @@ create table public.attachments (
   updated_at timestamptz not null default now()
 );
 
-create table public.inbox_items (
+create table if not exists public.inbox_items (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   client_id text not null,
@@ -192,7 +197,7 @@ create table public.inbox_items (
   unique (user_id, client_id)
 );
 
-create table public.notes (
+create table if not exists public.notes (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null default '',
@@ -206,7 +211,7 @@ create table public.notes (
   updated_at timestamptz not null default now()
 );
 
-create table public.routines (
+create table if not exists public.routines (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -221,7 +226,7 @@ create table public.routines (
   updated_at timestamptz not null default now()
 );
 
-create table public.tasks (
+create table if not exists public.tasks (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
@@ -243,7 +248,7 @@ create table public.tasks (
   updated_at timestamptz not null default now()
 );
 
-create table public.events (
+create table if not exists public.events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
@@ -261,7 +266,7 @@ create table public.events (
   updated_at timestamptz not null default now()
 );
 
-create table public.reminders (
+create table if not exists public.reminders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
@@ -276,7 +281,7 @@ create table public.reminders (
   updated_at timestamptz not null default now()
 );
 
-create table public.habits (
+create table if not exists public.habits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -294,7 +299,7 @@ create table public.habits (
   updated_at timestamptz not null default now()
 );
 
-create table public.habit_logs (
+create table if not exists public.habit_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   habit_id uuid not null references public.habits(id) on delete cascade,
@@ -308,7 +313,7 @@ create table public.habit_logs (
   unique (user_id, habit_id, log_date)
 );
 
-create table public.daily_reviews (
+create table if not exists public.daily_reviews (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   review_date date not null,
@@ -326,7 +331,7 @@ create table public.daily_reviews (
   unique (user_id, review_date, kind)
 );
 
-create table public.notification_preferences (
+create table if not exists public.notification_preferences (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users(id) on delete cascade,
   browser_enabled boolean not null default false,
@@ -340,7 +345,7 @@ create table public.notification_preferences (
   updated_at timestamptz not null default now()
 );
 
-create table public.notifications (
+create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
@@ -354,7 +359,7 @@ create table public.notifications (
   updated_at timestamptz not null default now()
 );
 
-create table public.audit_events (
+create table if not exists public.audit_events (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   entity_type text not null,
@@ -368,43 +373,43 @@ create table public.audit_events (
 );
 
 -- indexes
-create index on public.accounts (user_id);
-create index on public.expense_categories (user_id);
-create index on public.budgets (user_id, month);
-create index on public.savings_goals (user_id, status);
-create index on public.transactions (user_id, occurred_on desc);
-create index on public.transactions (user_id, category_id);
-create index on public.transactions (user_id, status);
-create index on public.savings_contributions (user_id, goal_id);
-create index on public.bills (user_id, next_due_on);
-create index on public.subscriptions (user_id, next_billing_on);
-create index on public.debts (user_id, status);
-create index on public.attachments (user_id, created_at desc);
-create index on public.inbox_items (user_id, status, captured_at desc);
-create index on public.notes (user_id, created_at desc);
-create index on public.notes (user_id, pinned);
-create index on public.tasks (user_id, status, due_on);
-create index on public.tasks (user_id, scheduled_start);
-create index on public.events (user_id, start_at);
-create index on public.reminders (user_id, status, remind_at);
-create index on public.routines (user_id, is_active);
-create index on public.habits (user_id, is_active);
-create index on public.habit_logs (user_id, log_date desc);
-create index on public.daily_reviews (user_id, review_date desc);
-create index on public.notifications (user_id, status, fire_at desc);
-create index on public.audit_events (user_id, entity_type, entity_id);
+create index if not exists accounts_user_id_idx on public.accounts (user_id);
+create index if not exists expense_categories_user_id_idx on public.expense_categories (user_id);
+create index if not exists budgets_user_id_month_idx on public.budgets (user_id, month);
+create index if not exists savings_goals_user_id_status_idx on public.savings_goals (user_id, status);
+create index if not exists transactions_user_id_occurred_on_idx on public.transactions (user_id, occurred_on desc);
+create index if not exists transactions_user_id_category_id_idx on public.transactions (user_id, category_id);
+create index if not exists transactions_user_id_status_idx on public.transactions (user_id, status);
+create index if not exists savings_contributions_user_id_goal_id_idx on public.savings_contributions (user_id, goal_id);
+create index if not exists bills_user_id_next_due_on_idx on public.bills (user_id, next_due_on);
+create index if not exists subscriptions_user_id_next_billing_on_idx on public.subscriptions (user_id, next_billing_on);
+create index if not exists debts_user_id_status_idx on public.debts (user_id, status);
+create index if not exists attachments_user_id_created_at_idx on public.attachments (user_id, created_at desc);
+create index if not exists inbox_items_user_id_status_captured_at_idx on public.inbox_items (user_id, status, captured_at desc);
+create index if not exists notes_user_id_created_at_idx on public.notes (user_id, created_at desc);
+create index if not exists notes_user_id_pinned_idx on public.notes (user_id, pinned);
+create index if not exists tasks_user_id_status_due_on_idx on public.tasks (user_id, status, due_on);
+create index if not exists tasks_user_id_scheduled_start_idx on public.tasks (user_id, scheduled_start);
+create index if not exists events_user_id_start_at_idx on public.events (user_id, start_at);
+create index if not exists reminders_user_id_status_remind_at_idx on public.reminders (user_id, status, remind_at);
+create index if not exists routines_user_id_is_active_idx on public.routines (user_id, is_active);
+create index if not exists habits_user_id_is_active_idx on public.habits (user_id, is_active);
+create index if not exists habit_logs_user_id_log_date_idx on public.habit_logs (user_id, log_date desc);
+create index if not exists daily_reviews_user_id_review_date_idx on public.daily_reviews (user_id, review_date desc);
+create index if not exists notifications_user_id_status_fire_at_idx on public.notifications (user_id, status, fire_at desc);
+create index if not exists audit_events_user_id_entity_type_entity_id_idx on public.audit_events (user_id, entity_type, entity_id);
 
 -- full-text search columns for memory sources
-alter table public.notes add column search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(body,'') || ' ' || array_to_string(tags,' '))) stored;
-create index notes_search_idx on public.notes using gin (search);
-alter table public.inbox_items add column search tsvector generated always as (to_tsvector('simple', coalesce(content,'') || ' ' || coalesce(url,''))) stored;
-create index inbox_search_idx on public.inbox_items using gin (search);
-alter table public.tasks add column search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(description,''))) stored;
-create index tasks_search_idx on public.tasks using gin (search);
-alter table public.transactions add column search tsvector generated always as (to_tsvector('simple', coalesce(merchant,'') || ' ' || coalesce(note,''))) stored;
-create index transactions_search_idx on public.transactions using gin (search);
-alter table public.attachments add column search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(file_name,'') || ' ' || array_to_string(tags,' '))) stored;
-create index attachments_search_idx on public.attachments using gin (search);
+alter table public.notes add column if not exists search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(body,'') || ' ' || public.tags_text(tags))) stored;
+create index if not exists notes_search_idx on public.notes using gin (search);
+alter table public.inbox_items add column if not exists search tsvector generated always as (to_tsvector('simple', coalesce(content,'') || ' ' || coalesce(url,''))) stored;
+create index if not exists inbox_search_idx on public.inbox_items using gin (search);
+alter table public.tasks add column if not exists search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(description,''))) stored;
+create index if not exists tasks_search_idx on public.tasks using gin (search);
+alter table public.transactions add column if not exists search tsvector generated always as (to_tsvector('simple', coalesce(merchant,'') || ' ' || coalesce(note,''))) stored;
+create index if not exists transactions_search_idx on public.transactions using gin (search);
+alter table public.attachments add column if not exists search tsvector generated always as (to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(file_name,'') || ' ' || public.tags_text(tags))) stored;
+create index if not exists attachments_search_idx on public.attachments using gin (search);
 
 -- updated_at triggers + RLS for every private table
 do $$
@@ -412,8 +417,13 @@ declare t text;
 begin
   foreach t in array array['profiles','accounts','expense_categories','budgets','savings_goals','transactions','savings_contributions','bills','subscriptions','debts','attachments','inbox_items','notes','routines','tasks','events','reminders','habits','habit_logs','daily_reviews','notification_preferences','notifications','audit_events']
   loop
+    execute format('drop trigger if exists %I_set_updated_at on public.%I', t, t);
     execute format('create trigger %I_set_updated_at before update on public.%I for each row execute function public.set_updated_at()', t, t);
     execute format('alter table public.%I enable row level security', t);
+    execute format('drop policy if exists %I_select on public.%I', t, t);
+    execute format('drop policy if exists %I_insert on public.%I', t, t);
+    execute format('drop policy if exists %I_update on public.%I', t, t);
+    execute format('drop policy if exists %I_delete on public.%I', t, t);
     execute format('create policy %I_select on public.%I for select to authenticated using ((select auth.uid()) = user_id)', t, t);
     execute format('create policy %I_insert on public.%I for insert to authenticated with check ((select auth.uid()) = user_id)', t, t);
     execute format('create policy %I_update on public.%I for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)', t, t);
@@ -422,8 +432,8 @@ begin
 end $$;
 
 -- audit events are append-only, even for the owner
-drop policy audit_events_update on public.audit_events;
-drop policy audit_events_delete on public.audit_events;
+drop policy if exists audit_events_update on public.audit_events;
+drop policy if exists audit_events_delete on public.audit_events;
 
 -- create profile + notification preferences on signup
 create or replace function public.handle_new_user() returns trigger language plpgsql security definer set search_path = public as $$
@@ -432,6 +442,7 @@ begin
   insert into public.notification_preferences (user_id) values (new.id);
   return new;
 end $$;
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
 
 -- full account data deletion, invoked by the app after explicit confirmation
@@ -467,7 +478,11 @@ end $$;
 
 -- private storage bucket: objects live under <user_id>/...
 insert into storage.buckets (id, name, public, file_size_limit) values ('private','private', false, 20971520) on conflict (id) do nothing;
+drop policy if exists "private_read_own" on storage.objects;
 create policy "private_read_own" on storage.objects for select to authenticated using (bucket_id = 'private' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "private_insert_own" on storage.objects;
 create policy "private_insert_own" on storage.objects for insert to authenticated with check (bucket_id = 'private' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "private_update_own" on storage.objects;
 create policy "private_update_own" on storage.objects for update to authenticated using (bucket_id = 'private' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "private_delete_own" on storage.objects;
 create policy "private_delete_own" on storage.objects for delete to authenticated using (bucket_id = 'private' and (storage.foldername(name))[1] = (select auth.uid())::text);

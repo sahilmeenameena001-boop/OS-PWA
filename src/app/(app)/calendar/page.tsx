@@ -117,13 +117,13 @@ function CalendarInner() {
         subtitle="Drag items between days on desktop. Recurring items follow their rule."
         actions={
           <>
-            <SegmentedControl value={view} onChange={setView} ariaLabel="Calendar view" options={[{ value: "day", label: "Day" }, { value: "week", label: "Week" }, { value: "agenda", label: "Agenda" }]} />
             <Button size="sm" variant="outline" onClick={() => setEditRoutine("new")}><IconRepeat size={16} /> Routine</Button>
             <Button size="sm" onClick={() => setCreating({ kind: "task", date: anchor })}><IconPlus size={16} /> Task</Button>
             <Button size="sm" variant="secondary" onClick={() => setCreating({ kind: "event", date: anchor })}><IconPlus size={16} /> Event</Button>
           </>
         }
       />
+      <SegmentedControl value={view} onChange={setView} ariaLabel="Calendar view" options={[{ value: "day", label: "Day" }, { value: "week", label: "Week" }, { value: "agenda", label: "Agenda" }]} />
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" size="icon" onClick={() => shift(-1)} aria-label="Previous"><IconChevronLeft size={18} /></Button>
         <div className="text-center">

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useUI } from "@/store/ui";
 import { useSession } from "@/lib/session/session-provider";
@@ -48,6 +48,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const setPaletteOpen = useUI((s) => s.setPaletteOpen);
   const inbox = useRowsOr("inbox_items");
   const unprocessed = inbox.filter((i) => i.status === "unprocessed").length;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (ready && profile && !profile.onboarding_completed && pathname !== "/onboarding") router.replace("/onboarding");
@@ -134,12 +136,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <NotificationCenter />
         </div>
         <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-4 md:px-6 md:pb-10" tabIndex={-1}>
-          {children}
+          {mounted ? children : <div className="space-y-4" aria-busy="true"><div className="skeleton h-10 w-56 rounded-xl" /><div className="skeleton h-40 rounded-2xl" /><div className="skeleton h-40 rounded-2xl" /></div>}
         </main>
       </div>
 
       {/* Persistent Quick Capture: one tap from every screen */}
-      <button onClick={() => openCapture()} className="press anim-pulse-ring fixed right-4 bottom-24 z-40 grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lift md:right-8 md:bottom-8" aria-label="Quick capture (shortcut C)">
+      <button onClick={() => openCapture()} className="press anim-pulse-ring fixed right-8 bottom-8 z-40 hidden size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lift md:grid" aria-label="Quick capture (shortcut C)">
         <IconCapture size={26} />
       </button>
 

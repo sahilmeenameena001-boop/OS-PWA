@@ -12,7 +12,7 @@ export function PageHeader({ title, subtitle, actions, className }: { title: str
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
         {subtitle ? <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p> : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="-mx-4 flex w-[calc(100%+2rem)] items-center gap-2 overflow-x-auto px-4 no-scrollbar md:mx-0 md:w-auto md:flex-wrap md:overflow-visible md:px-0 [&>*]:shrink-0">{actions}</div> : null}
     </header>
   );
 }
@@ -114,9 +114,9 @@ export function SkeletonRows({ rows = 3, className }: { rows?: number; className
 
 export function SegmentedControl<T extends string>({ value, onChange, options, ariaLabel }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; ariaLabel: string }) {
   return (
-    <div role="tablist" aria-label={ariaLabel} className="inline-flex rounded-xl bg-muted p-1">
+    <div role="tablist" aria-label={ariaLabel} className="flex w-full max-w-full overflow-x-auto no-scrollbar rounded-xl bg-muted p-1 md:inline-flex md:w-auto">
       {options.map((o) => (
-        <button key={o.value} role="tab" aria-selected={value === o.value} onClick={() => onChange(o.value)} className={cn("tap rounded-lg px-3 text-sm font-medium transition-colors", value === o.value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+        <button key={o.value} role="tab" aria-selected={value === o.value} onClick={() => onChange(o.value)} className={cn("tap shrink-0 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors", value === o.value ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
           {o.label}
         </button>
       ))}

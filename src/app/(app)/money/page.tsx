@@ -3,7 +3,10 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useSession } from "@/lib/session/session-provider";
-import { useRows, useRowsOr, useCurrency } from "@/lib/data/hooks";
+import { useRows, useRowsOr, useCurrency, useProfile } from "@/lib/data/hooks";
+import { update } from "@/lib/data/repo";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Field } from "@/components/common";
 import { useMoneySnapshot } from "@/components/money/use-money-snapshot";
 import { formatMoney } from "@/lib/format";
 import { todayKey, formatDateHuman, monthKey } from "@/lib/dates";
@@ -26,7 +29,10 @@ function MoneyInner() {
   const params = useSearchParams();
   const { userId } = useSession();
   const currency = useCurrency();
+  const profile = useProfile();
   const openExpense = useUI((s) => s.openExpense);
+  const [incomeDlg, setIncomeDlg] = useState(false);
+  const [incomeForm, setIncomeForm] = useState({ monthly_income: "", income_day: "1" });
   const [tab, setTab] = useState<Tab>((params.get("tab") as Tab) || "overview");
   const snap = useMoneySnapshot();
   const transactions = useRows("transactions");
@@ -108,7 +114,11 @@ function MoneyInner() {
               <Stat label="Available money" value={formatMoney(snap.availableForSpending, currency)} tone={snap.availableForSpending < 0 ? "coral" : "default"} hint="after savings, bills and debts" />
               <Stat label="Debt commitments" value={formatMoney(snap.debtCommitments, currency)} />
               <Stat label="Projected month-end" value={formatMoney(snap.projectedMonthEnd, currency)} tone={snap.projectedMonthEnd < 0 ? "coral" : "primary"} />
-              <Stat label="Income this period" value={formatMoney(snap.incomeThisPeriod, currency)} tone="mint" />
+              <button onClick={() => { setIncomeForm({ monthly_income: String(profile?.monthly_income ?? ""), income_day: String(profile?.income_day ?? 1) }); setIncomeDlg(true); }} className="rounded-xl bg-muted/50 p-3 text-left hover:bg-muted" aria-label="Edit monthly income">
+                <p className="text-xs text-muted-foreground">Monthly income / pocket money</p>
+                <p className="mt-0.5 text-lg font-semibold tabular-nums text-mint">{formatMoney(profile?.monthly_income ?? 0, currency)}</p>
+                <p className="mt-0.5 text-xs text-primary">{(profile?.monthly_income ?? 0) > 0 ? `Arrives on day ${profile?.income_day ?? 1} · tap to edit` : "Tap to set"}</p>
+              </button>
             </div>
           )}
           <div className="grid gap-4 md:grid-cols-2">
@@ -246,6 +256,16 @@ function MoneyInner() {
         </Panel>
       ) : null}
 
+      <Dialog open={incomeDlg} onOpenChange={setIncomeDlg}>
+        <DialogContent className="sm:max-w-sm">
+          <form onSubmit={async (e) => { e.preventDefault(); await update("profiles", userId, userId, { monthly_income: Number(incomeForm.monthly_income) || 0, income_day: Math.min(28, Math.max(1, Number(incomeForm.income_day) || 1)) }); toast.success("Income updated"); setIncomeDlg(false); }} className="space-y-3">
+            <DialogHeader><DialogTitle>Monthly income / pocket money</DialogTitle><DialogDescription>What reaches you each month. Safe-to-spend recalculates instantly.</DialogDescription></DialogHeader>
+            <Field label="Amount per month" htmlFor="inc-amount"><Input id="inc-amount" type="number" inputMode="decimal" min={0} value={incomeForm.monthly_income} onChange={(e) => setIncomeForm({ ...incomeForm, monthly_income: e.target.value })} autoFocus /></Field>
+            <Field label="Day it arrives (1–28)" htmlFor="inc-day" hint="Starts your budget period."><Input id="inc-day" type="number" min={1} max={28} value={incomeForm.income_day} onChange={(e) => setIncomeForm({ ...incomeForm, income_day: e.target.value })} /></Field>
+            <DialogFooter><Button type="button" variant="outline" onClick={() => setIncomeDlg(false)}>Cancel</Button><Button type="submit">Save</Button></DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       <BillDialog open={dlg?.kind === "bill"} onOpenChange={(o) => !o && setDlg(null)} bill={dlg?.kind === "bill" ? dlg.item : null} />
       <SubscriptionDialog open={dlg?.kind === "sub"} onOpenChange={(o) => !o && setDlg(null)} sub={dlg?.kind === "sub" ? dlg.item : null} />
       <DebtDialog open={dlg?.kind === "debt"} onOpenChange={(o) => !o && setDlg(null)} debt={dlg?.kind === "debt" ? dlg.item : null} />

@@ -17,7 +17,7 @@ cp .env.example .env.local   # optional: add Supabase keys
 npm run dev
 ```
 
-Without Supabase keys the app runs in **local demo mode** with realistic seed data. Everything works offline and stays in the browser.
+Without Supabase keys the app runs in **local mode**: it starts empty, walks you through onboarding, and keeps everything in that browser only. For a team, configure Supabase so each person signs in to their own account; row-level security keeps every account's data private.
 
 With keys set, sign in at `/login` (password or magic link). New accounts get a profile automatically (database trigger) and go through onboarding.
 

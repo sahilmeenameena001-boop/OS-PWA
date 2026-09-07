@@ -72,7 +72,7 @@ export function SessionProvider({ children, initialUserId, initialEmail }: { chi
             setSyncState(typeof navigator !== "undefined" && !navigator.onLine ? "offline" : "error");
           }
         }
-        await ensureSeeded(userId, { onlyProfile: true });
+        await ensureSeeded(userId);
       }
       if (!cancelled) setReady(true);
     })();

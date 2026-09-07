@@ -77,7 +77,7 @@ export default function SettingsPage() {
         <form onSubmit={(e) => { e.preventDefault(); void saveProfile(); }} className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
           <Field label="Name" htmlFor="s-name"><Input id="s-name" value={f.display_name} onChange={(e) => setF({ ...f, display_name: e.target.value })} /></Field>
           <Field label="Currency" htmlFor="s-currency"><Input id="s-currency" value={f.currency} onChange={(e) => setF({ ...f, currency: e.target.value.toUpperCase().slice(0, 3) })} /></Field>
-          <Field label="Monthly income" htmlFor="s-income"><Input id="s-income" type="number" min={0} value={f.monthly_income} onChange={(e) => setF({ ...f, monthly_income: e.target.value })} /></Field>
+          <Field label="Monthly income / pocket money" htmlFor="s-income"><Input id="s-income" type="number" min={0} value={f.monthly_income} onChange={(e) => setF({ ...f, monthly_income: e.target.value })} /></Field>
           <Field label="Income day" htmlFor="s-day" hint="Starts your budget period"><Input id="s-day" type="number" min={1} max={28} value={f.income_day} onChange={(e) => setF({ ...f, income_day: e.target.value })} /></Field>
           <Field label="Opening balance" htmlFor="s-opening"><Input id="s-opening" type="number" value={f.opening_balance} onChange={(e) => setF({ ...f, opening_balance: e.target.value })} /></Field>
           <Field label="Minimum protected savings" htmlFor="s-protected"><Input id="s-protected" type="number" min={0} value={f.protected_savings_min} onChange={(e) => setF({ ...f, protected_savings_min: e.target.value })} /></Field>

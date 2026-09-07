@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/lib/session/session-provider";
 import { useRowsOr, useCurrency } from "@/lib/data/hooks";
@@ -177,10 +177,15 @@ export function CategoryDialog({ open, onOpenChange, category }: { open: boolean
 /** Income or transfer entry. Expenses use the QuickExpense dialog. */
 export function IncomeTransferDialog({ open, onOpenChange, type }: { open: boolean; onOpenChange: (o: boolean) => void; type: "income" | "transfer" }) {
   const { userId } = useSession();
-  const accounts = useRowsOr("accounts").filter((a) => !a.is_archived);
+  const accountRows = useRowsOr("accounts");
+  const accounts = useMemo(() => accountRows.filter((a) => !a.is_archived), [accountRows]);
   const currency = useCurrency();
   const [f, setF] = useState({ amount: "", account_id: "", to_account_id: "", merchant: "", note: "", occurred_on: todayKey() });
-  useEffect(() => { if (open) setF({ amount: "", account_id: accounts[0]?.id ?? "", to_account_id: accounts[1]?.id ?? "", merchant: type === "income" ? "Salary" : "", note: "", occurred_on: todayKey() }); }, [open, type, accounts]);
+  // Reset only when the dialog opens; a fresh array dependency here would wipe input on every keystroke.
+  useEffect(() => {
+    if (open) setF({ amount: "", account_id: accounts[0]?.id ?? "", to_account_id: accounts[1]?.id ?? "", merchant: type === "income" ? "Salary" : "", note: "", occurred_on: todayKey() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: reset on open/type only
+  }, [open, type]);
   const save = async () => {
     await recordTransaction(userId, { type, amount: Number(f.amount), account_id: f.account_id || null, to_account_id: type === "transfer" ? f.to_account_id || null : null, merchant: f.merchant || null, note: f.note || null, occurred_on: f.occurred_on, is_discretionary: false });
     toast.success(`${type === "income" ? "Income" : "Transfer"} of ${formatMoney(Number(f.amount), currency)} recorded`); onOpenChange(false);
